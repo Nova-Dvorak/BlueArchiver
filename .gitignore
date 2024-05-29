@@ -32,11 +32,4 @@
 *.app
 
 # Test files
-*.jpg
-*.png
-*.bmp
-*.mp4
-*.mov
-*.mp3
-*.wav
-*.flac
+testfile**
