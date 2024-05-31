@@ -1,7 +1,7 @@
 #include<cstdio>
 #include<cstring>
 #include<unordered_map>
-#include"BA-error.h"
+#include"error.h"
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;

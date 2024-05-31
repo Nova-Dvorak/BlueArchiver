@@ -3,7 +3,7 @@
 #include<string>
 #include<unordered_map>
 #include<vector>
-#include"BA-error.h"
+#include"error.h"
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
