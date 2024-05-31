@@ -38,14 +38,11 @@ struct LZ78Item //Encoded data
 
 int main(int argc, char **argv)
 {
-    #define argc 2
-    #define argv aaa
     if(argc != 2)
     {
         fprintf(stderr, HELP);
         return PARAM_ERROR;
     }
-    char *aaa[] = {"", "test.yuuka"};
     //file extension checking
     char *extension=strrchr(argv[1], '.');
     if(extension==NULL || strcmp(extension, ".yuuka") != 0)
