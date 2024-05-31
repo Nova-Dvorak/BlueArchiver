@@ -4,9 +4,13 @@
 
 This version is created for my \"creation and practice\" course assignment.
 
-As an early version of the program, now it can only compress/decompress one file at a time, using simple Huffman coding, to generate a file with ".yuuka" extension name.
+### function
 
-I split the compressor and decompressor into two separate programs, both written in one single .cpp file.
+As an early version of the program, now it can only compress/decompress one file at a time, to generate a file with ".yuuka" extension name.
+
+It uses **LZ78** algorithm now.
+
+### In the future
 
 I hope that I can add more functions into this project, making it a useful tool. Also, I may develop this project to learn how to develop programs with multi files. What's more, writing readme in English may be helpful in English learning.
 
@@ -20,39 +24,24 @@ Use the program with command line.
 
 ---
 
-The compressor has 2 parameters:
+Both the compressor and decompressor have 2 parameters, with the second one optional:
 
 1. the input file name
-2. the output file name (the file extension "yuuka" will be appended later)
+2. the output file name (optional)
 
-The input file should be in the same folder as the compressor.
+For the compressor, if the second parameter is missing, the output file name would be "the input file name with extension".yuuka
 
+For the decompressor, now you can specify the output file name using the second parameter, or it will use the file name written in the .yuuka file.
 
-
-The decompressor has 1 parameters:
-
-​	the input filename (file extension "yuuka" included)
+Also, .yuuka is not needed in decompressor's input file name anymore. 
 
 Wrong parameter number would activate the help page.
 
 ### Attention
 
-The compressor will directly cover the file with the output file name.
-
-The decompressor cannot work when the file has exist.
-
-Extreme situations which generate Huffman code with 256-bit length aren't tested, and will probably lead to a crash.
-
-~~Situations with 0 length is not tested, either.~~ This might not be a problem.
+The compressor will directly cover the file with the output file name. (Will be fixed soon.)
 
 # What's more
-
-## About the title
-
-I just want to play a joke on the game which I am crazy about right now, Blue Archive.
-Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... But it's still a lot of fun to enjoy the game, as well as the user-generated contents.
-
-By the way, Hayase Yuuka is such an excellent candidate for my mother. Although like the ".yuuka" files, she might be a little heavier than she looks like...
 
 ## About the code
 
@@ -63,3 +52,10 @@ It just popped out loads of codes when I typed my first words, and the codes are
 It was an amazing experience. But sometimes I think it should go quiet. The grey words were like naughty kids shouting at me, telling me how to code.
 
 Actually, it also helped me to find out that most of my words or codes have just little meaning. I might have to learn much more to become a smart person.
+
+## About the title
+
+I just want to play a joke on the game which I am crazy about right now, Blue Archive.
+Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... But it's still a lot of fun to enjoy the game, as well as the user-generated contents.
+
+By the way, Hayase Yuuka is such an excellent candidate for my mother. Although like the ".yuuka" files, she might be a little heavier than she looks like...
