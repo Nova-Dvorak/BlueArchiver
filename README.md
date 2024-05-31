@@ -12,7 +12,7 @@ I hope that I can add more functions into this project, making it a useful tool.
 
 # How to use
 
-Compile it with C++11 or higher version.
+Compile it with C++14 or higher version.
 
 (I probably didn't use any compiler-specific or system-specific functions, so it's likely to be cross-platformed)
 
@@ -49,7 +49,8 @@ Extreme situations which generate Huffman code with 256-bit length aren't tested
 
 ## About the title
 
-I just want to play a joke on the game which I am crazy about. Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... I think I shouldn't have make this thing such an indespensible part of my life, but those lively characters are just so appealing, while the story with historical, mythical elements was so engaging.
+I just want to play a joke on the game which I am crazy about right now, Blue Archive.
+Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... But it's still a lot of fun to enjoy the game, as well as the user-generated contents.
 
 By the way, Hayase Yuuka is such an excellent candidate for my mother. Although like the ".yuuka" files, she might be a little heavier than she looks like...
 

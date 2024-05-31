@@ -1,16 +1,3 @@
-/*
-version pre-0.2
-
-    *Version pre-0.1 is served with single file compression and decompression, applying huffman coding on each byte.
-    *Plan:
-    *    Add more information to stderr output.
-    *    Separate different error codes.
-    *Later plans:
-    *    Change the parameters
-    *        enable default output filename
-    *        enable dictionary size control
-    *    Separate the code into different files. (This might be done later, when the project gets more complex.)
-*/
 #include<cstdio>
 #include<cstring>
 #include<string>
@@ -23,21 +10,6 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long long uint64;
 
-constexpr char HELP[]=R"(This program is part of BLUE ARCHIVER.
-
-BLUE ARCHIVER is a file archive program using simple compression algorithms, developed as a trial and exercise to enhance my coding skills.
-It generates a file with ".yuuka" extension.
-
-    parameters:
-    there are only 2 parameters:
-
-        1. the input filename;
-        2. the output filename. (the file extension "yuuka" will be appended later)
-
-At last, I want to marry Hayase Yuuka.
-I love Shiromi Iori, Sunaōkami Shiroko and Kuromi Serika too.
-And Tsukiyuki Miyako, who hates adults like me.
-)";
 struct Header
 {
     const char identifier[8] = "BAYuuka";
@@ -74,6 +46,8 @@ void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
     uint16 last = 0;
     while(inputsize > 0)
     {
+        if(inputsize == 1)
+            printf("Last byte.\n"); //debug
         fread(&c, 1, 1, input);
         inputsize--;
         current += c;
@@ -88,15 +62,16 @@ void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
         else
             last = in_dict[current];
     }
+    data.emplace_back(last, c);
 }
 
 
 
 int main(int argc, char **argv)
 {
-    if(argc != 3)
+    if(argc != 3 && argc != 2)
     {
-        fprintf(stderr, HELP);
+        fprintf(stderr, HELP1);
         return PARAM_ERROR;
     }
 
@@ -137,8 +112,22 @@ int main(int argc, char **argv)
     /*output part*/
 
     //output file opening
-    char *outfile = new char[strlen(argv[2]) + 7];
-    sprintf(outfile, "%s.yuuka", argv[2]);
+    const char *filename = strrchr(argv[1], '\\');
+    if(filename == nullptr) filename = strrchr(argv[1], '/');
+    if(filename != nullptr)
+        filename++; // Move past the '\\' character
+    else
+        filename = argv[1]; // If '\\' is not found, use the entire string as the filename
+    char *outfile;
+    if(argc == 3)
+    {
+        outfile = new char[strlen(argv[2]) + 7];
+        sprintf(outfile, "%s.yuuka", argv[2]);
+    }
+    else {
+        outfile = new char[strlen(filename) + 7];
+        sprintf(outfile, "%s.yuuka", filename);
+    }
     FILE *output = fopen(outfile, "wb");
     if(output == nullptr)
     {
@@ -148,12 +137,6 @@ int main(int argc, char **argv)
     fprintf(stderr, "File %s opened.\n", outfile);
 
     //header completion
-    const char *filename = strrchr(argv[1], '\\');
-    if(filename == nullptr) filename = strrchr(argv[1], '/');
-    if(filename != nullptr)
-        filename++; // Move past the '\\' character
-    else
-        filename = argv[1]; // If '\\' is not found, use the entire string as the filename
 
     Header header(strlen(filename), inputsize, data.size());
     fprintf(stderr, "Filename: %s\n", filename);
