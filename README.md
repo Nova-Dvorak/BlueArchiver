@@ -12,7 +12,7 @@ It uses **LZ78** algorithm now.
 
 ### In the future
 
-I hope that I can add more functions into this project, making it a useful tool. Also, I may develop this project to learn how to develop programs with multi files. What's more, writing readme in English may be helpful in English learning.
+I hope that I can add more functions into this project, making it a useful tool. Also, I may develop this project to learn how to develop programs with multi files, how to use git, and so on. What's more, writing readme in English may be helpful in English learning.
 
 # How to use
 
@@ -56,6 +56,11 @@ Actually, it also helped me to find out that most of my words or codes have just
 ## About the title
 
 I just want to play a joke on the game which I am crazy about right now, Blue Archive.
+
 Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... But it's still a lot of fun to enjoy the game, as well as the user-generated contents.
 
 By the way, Hayase Yuuka is such an excellent candidate for my mother. Although like the ".yuuka" files, she might be a little heavier than she looks like...
+
+---
+
+Enjoy the code, and feel free to contact me if you are interested. (Although there might be few people who may see this little project...)
