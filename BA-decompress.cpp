@@ -1,7 +1,7 @@
-// Path: BA-decompress.cpp
 #include<cstdio>
 #include<cstring>
 #include<unordered_map>
+#include"BA-error.h"
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
@@ -28,7 +28,6 @@ struct Header
 };
 
 /*LZ78 part*/
-#define MAX_DICT_SIZE 4096
 struct LZ78Item //Encoded data
 {
     uint16 index;
@@ -44,7 +43,7 @@ int main(int argc, char **argv)
     if(argc != 2)
     {
         fprintf(stderr, HELP);
-        return -1;
+        return PARAM_ERROR;
     }
     char *aaa[] = {"", "test.yuuka"};
     //file extension checking
@@ -52,7 +51,7 @@ int main(int argc, char **argv)
     if(extension==NULL || strcmp(extension, ".yuuka") != 0)
     {
         fprintf(stderr, "Error: This is not a yuuka file!\n");
-        return -1;
+        return FILE_ERROR;
     }
 
 
@@ -63,7 +62,7 @@ int main(int argc, char **argv)
     if(input==NULL)
     {
         fprintf(stderr, "Error: Cannot open the input file.\n");
-        return -1;
+        return FILE_ERROR | INPUT_ERROR;
     }
 
     //header reading
@@ -72,7 +71,7 @@ int main(int argc, char **argv)
     if(memcmp(header.identifier, "BAYuuka", 8) != 0)
     {
         fprintf(stderr, "Error: File identifier is not correct.\n");
-        return -1;
+        return CONTENT_ERROR | INPUT_ERROR;
     }
     fprintf(stderr, "Header content: filename_length=%x, item_count=%08llx\n", header.filename_length, header.item_count);
 
@@ -93,14 +92,14 @@ int main(int argc, char **argv)
         if(c != 'Y' && c != 'y')
         {
             fprintf(stderr, "Operation cancelled.\n");
-            return -1;
+            return 0;
         }
     }
     output = fopen(filename, "wb");
     if(output == NULL)
     {
         fprintf(stderr, "Error: Cannot open the output file.\n");
-        return -1;
+        return FILE_ERROR | OUTPUT_ERROR;
     }
     fprintf(stderr, "Output file %s opened.\n", filename);
 
@@ -108,8 +107,8 @@ int main(int argc, char **argv)
 
 
     /*Decoding Part*/
-    FILE *debug = fopen("Ddebug.txt", "w");
     std::unordered_map<uint16, std::string> dict;
+    fprintf(stderr, "Decoding & Writing...");
     for(uint64 i = 0; i < header.item_count; i++)
     {
         uint16 index;
@@ -118,18 +117,17 @@ int main(int argc, char **argv)
         fread(&next_char, sizeof(next_char), 1, input);
         if(index == 0)
         {
-            fprintf(debug, "%04x %c\n", 0, next_char);
             fwrite(&next_char, 1, 1, output);
             dict.insert({dict.size() + 1, std::string(1, next_char)});
         }
         else
         {
-            fprintf(debug, "%04x %s\n%04x %c\n", index, dict[index].c_str(), 0, next_char);
             fwrite(dict[index].c_str(), dict[index].size(), 1, output);
             fwrite(&next_char, 1, 1, output);
             dict.insert({dict.size() + 1, dict[index] + next_char});
         }
     }
+    fprintf(stderr, "Complete.\n");
 
 
     fclose(output);

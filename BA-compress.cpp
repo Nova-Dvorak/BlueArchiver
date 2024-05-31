@@ -3,11 +3,8 @@ version pre-0.2
 
     *Version pre-0.1 is served with single file compression and decompression, applying huffman coding on each byte.
     *Plan:
-    *    /Replace the bit-based algorithm with the byte-based LZ78 algorithm.
-    *    /Reconstruct the code structure.
     *    Add more information to stderr output.
     *    Separate different error codes.
-    *    /Remove unnecessary comments.
     *Later plans:
     *    Change the parameters
     *        enable default output filename
@@ -19,6 +16,7 @@ version pre-0.2
 #include<string>
 #include<unordered_map>
 #include<vector>
+#include"BA-error.h"
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
@@ -59,7 +57,7 @@ The file should go like this:
 
 
 /*LZ78 part*/
-#define MAX_DICT_SIZE 65535
+#define MAX_DICT_SIZE 65535 //limited by uint16, index starts from 1
 struct LZ78Item //Encoded data
 {
     uint16 index;
@@ -69,7 +67,6 @@ struct LZ78Item //Encoded data
 
 void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
 {
-    FILE *debug = fopen("debug.txt", "w");
 
     std::unordered_map<std::string, uint16> in_dict;
     std::string current;
@@ -83,10 +80,7 @@ void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
         if(in_dict.find(current) == in_dict.end())
         {
             if(in_dict.size() < MAX_DICT_SIZE)
-            {
                 in_dict.insert({current, in_dict.size() + 1});
-                fprintf(debug, "%04x %s\n", in_dict.size(), current.c_str());
-            }
             data.emplace_back(last, c);
             current.clear();
             last = 0;
@@ -94,20 +88,16 @@ void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
         else
             last = in_dict[current];
     }
-    fclose(debug);
 }
 
 
 
 int main(int argc, char **argv)
 {
-    #define argc 3
-    #define argv aaa
-    const char *aaa[] = {"BA-compress", "testfile_yuuka.jpg", "test"};
     if(argc != 3)
     {
         fprintf(stderr, HELP);
-        return -1;
+        return PARAM_ERROR;
     }
 
 
@@ -118,7 +108,7 @@ int main(int argc, char **argv)
     if(input == nullptr)
     {
         fprintf(stderr, "Error: cannot open file %s\n", argv[1]);
-        return -1;
+        return INPUT_ERROR | FILE_ERROR;
     }
     fprintf(stderr, "File %s opened.\n", argv[1]);
     //checking file size
@@ -128,7 +118,7 @@ int main(int argc, char **argv)
     if(inputsize == 0)
     {
         fprintf(stderr, "Error: file %s is empty.\n", argv[1]);
-        return -1;
+        return INPUT_ERROR | CONTENT_ERROR;
     }
     fprintf(stderr, "File size: %08x bytes.\n", inputsize);
 
@@ -147,13 +137,13 @@ int main(int argc, char **argv)
     /*output part*/
 
     //output file opening
-    char *outfile = new char[strlen(argv[2]) + 6];
+    char *outfile = new char[strlen(argv[2]) + 7];
     sprintf(outfile, "%s.yuuka", argv[2]);
     FILE *output = fopen(outfile, "wb");
     if(output == nullptr)
     {
         fprintf(stderr, "Error: cannot open file %s\n", outfile);
-        return -1;
+        return OUTPUT_ERROR | FILE_ERROR;
     }
     fprintf(stderr, "File %s opened.\n", outfile);
 
@@ -165,7 +155,6 @@ int main(int argc, char **argv)
     else
         filename = argv[1]; // If '\\' is not found, use the entire string as the filename
 
-    #define filename "my_yuuka.jpg"
     Header header(strlen(filename), inputsize, data.size());
     fprintf(stderr, "Filename: %s\n", filename);
     fprintf(stderr, "Compressed size: %08x items.\n", data.size());

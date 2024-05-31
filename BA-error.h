@@ -1,0 +1,5 @@
+#define FILE_ERROR 2
+#define CONTENT_ERROR 4
+#define INPUT_ERROR 8
+#define OUTPUT_ERROR 16
+#define PARAM_ERROR 32
