@@ -1,7 +1,24 @@
+/*
+version pre-0.2
+
+    *Version pre-0.1 is served with single file compression and decompression, applying huffman coding on each byte.
+    *Plan:
+    *    /Replace the bit-based algorithm with the byte-based LZ78 algorithm.
+    *    /Reconstruct the code structure.
+    *    Add more information to stderr output.
+    *    Separate different error codes.
+    *    /Remove unnecessary comments.
+    *Later plans:
+    *    Change the parameters
+    *        enable default output filename
+    *        enable dictionary size control
+    *    Separate the code into different files. (This might be done later, when the project gets more complex.)
+*/
 #include<cstdio>
 #include<cstring>
+#include<string>
+#include<unordered_map>
 #include<vector>
-#include<queue>
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
@@ -9,114 +26,89 @@ typedef unsigned int uint32;
 typedef unsigned long long uint64;
 
 constexpr char HELP[]=R"(This program is part of BLUE ARCHIVER.
-BLUE ARCHIVER is a file archive program using simple compression algorithms.
-As an early version of the program, this version can only compress only one file a time.
 
-parameters:
-there are only 2 parameters:
-    1. the input filename;
-    2. the output filename. (the file extension "yuuka" will be appended later)
+BLUE ARCHIVER is a file archive program using simple compression algorithms, developed as a trial and exercise to enhance my coding skills.
+It generates a file with ".yuuka" extension.
 
-And at last, yuri is good for our health. So please support yuri content creation in Blue Archive community. Thank you very much.
+    parameters:
+    there are only 2 parameters:
 
+        1. the input filename;
+        2. the output filename. (the file extension "yuuka" will be appended later)
+
+At last, I want to marry Hayase Yuuka.
+I love Shiromi Iori, Sunaōkami Shiroko and Kuromi Serika too.
+And Tsukiyuki Miyako, who hates adults like me.
 )";
 struct Header
 {
-    const char identifier[8] = "BA+++++";
+    const char identifier[8] = "BAYuuka";
     uint8 filename_length;
-    uint64 size;
-    uint8 key_length[256];
+    uint64 size, item_count;
+    Header(uint8 fl, uint64 s, uint64 ic): filename_length(fl), size(s), item_count(ic) {}
 };
 /*
 The file should go like this:
-    Header of 280 bytes                                         which type is Header
+    Header of 32 bytes                                          which type is Header
     Filename of filename_length bytes (without null-terminator) which type is char[]
-    Dictionary of ceil(sum of key_length / 8) bytes             which type is uint8[]
-    Compressed data of ceil(size / 8) bytes                     which type is uint8[]                             
+    Compressed data of item_count * 3 bytes                     which type is LZ78Item[]
+
+    Changes:
+    * The dictionary is no longer stored in the file.
 */
 
 
-
-
-
-
-
-/*Huffman part*/
-class HuffmanNode
+/*LZ78 part*/
+#define MAX_DICT_SIZE 65535
+struct LZ78Item //Encoded data
 {
-public:
-    class Huff_comp
-    {
-    public:
-        bool operator() (HuffmanNode* a, HuffmanNode* b) const
-        { return a->frequency > b->frequency; }
-    };
-
-
-
-    HuffmanNode *son[2];
-    uint8 value;
-    uint32 frequency;
-    HuffmanNode(uint8 value, uint32 frequency) : value(value), frequency(frequency), son{nullptr, nullptr} {}
-    HuffmanNode(HuffmanNode *son[2]) : son{son[0], son[1]}, value(0), frequency(son[0]->frequency + son[1]->frequency) {}
-    ~HuffmanNode()
-    {
-        if(son[0] != nullptr)
-            delete son[0];
-        if(son[1] != nullptr)
-            delete son[1];
-    }
+    uint16 index;
+    char next_char;
+    LZ78Item(uint16 i, char c): index(i), next_char(c) {}
 };
 
-
-HuffmanNode *build_tree(uint32 *frequency)
+void compress(std::vector<LZ78Item> &data, FILE *input, int inputsize)
 {
-    std::priority_queue<HuffmanNode*, std::vector<HuffmanNode*>, HuffmanNode::Huff_comp> pq;
-    for(uint32 i = 0; i < 256; i++)
+    FILE *debug = fopen("debug.txt", "w");
+
+    std::unordered_map<std::string, uint16> in_dict;
+    std::string current;
+    char c;
+    uint16 last = 0;
+    while(inputsize > 0)
     {
-        if(frequency[i] != 0)
-            pq.push(new HuffmanNode(i, frequency[i]));
+        fread(&c, 1, 1, input);
+        inputsize--;
+        current += c;
+        if(in_dict.find(current) == in_dict.end())
+        {
+            if(in_dict.size() < MAX_DICT_SIZE)
+            {
+                in_dict.insert({current, in_dict.size() + 1});
+                fprintf(debug, "%04x %s\n", in_dict.size(), current.c_str());
+            }
+            data.emplace_back(last, c);
+            current.clear();
+            last = 0;
+        }
+        else
+            last = in_dict[current];
     }
-    while(pq.size() > 1)
-    {
-        HuffmanNode *son[2];
-        son[0] = pq.top();
-        pq.pop();
-        son[1] = pq.top();
-        pq.pop();
-        pq.push(new HuffmanNode(son));
-    }
-    return pq.top();
+    fclose(debug);
 }
-
-void build_table(HuffmanNode *now, std::vector<bool> table[256], std::vector<bool> path)
-{
-    if(now->son[0] == nullptr && now->son[1] == nullptr)
-    {
-        table[now->value] = path;
-        return;
-    }
-    path.push_back(false);
-    build_table(now->son[0], table, path);
-    path.pop_back();
-    path.push_back(true);
-    build_table(now->son[1], table, path);
-}
-
-
 
 
 
 int main(int argc, char **argv)
 {
+    #define argc 3
+    #define argv aaa
+    const char *aaa[] = {"BA-compress", "testfile_yuuka.jpg", "test"};
     if(argc != 3)
     {
         fprintf(stderr, HELP);
         return -1;
     }
-
-
-
 
 
     /*input part*/
@@ -128,49 +120,27 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error: cannot open file %s\n", argv[1]);
         return -1;
     }
-
-    Header header;
-    
+    fprintf(stderr, "File %s opened.\n", argv[1]);
     //checking file size
     fseek(input, 0, SEEK_END);
     int inputsize = ftell(input);
     fseek(input, 0, SEEK_SET);
-
-
-
-
-
-    /*encoding part*/
-
-    //counting frequency
-    uint32 frequency[256] = {0};
-    for(uint32 i = 0; i < inputsize; i++)
+    if(inputsize == 0)
     {
-        uint8 c;
-        fread(&c, 1, 1, input);
-        frequency[c]++;
+        fprintf(stderr, "Error: file %s is empty.\n", argv[1]);
+        return -1;
     }
+    fprintf(stderr, "File size: %08x bytes.\n", inputsize);
 
 
-    //building huffman tree
-    HuffmanNode *root = build_tree(frequency);
-    
-    //building huffman code table
-    std::vector<bool> table[256];
-    build_table(root, table, std::vector<bool>());
 
-    //encoding
-    fseek(input, 0, SEEK_SET);
-    std::vector<bool> code;
-    for(uint32 i = 0; i < inputsize; i++)
-    {
-        uint8 c;
-        fread(&c, 1, 1, input);
-        for(bool bit : table[c])
-            code.push_back(bit);
-    }
+    /*compression part*/
+
+    std::vector<LZ78Item> data;
+    fprintf(stderr, "Compressing...");
+    compress(data, input, inputsize);
+    fprintf(stderr, "Complete.\n");
     fclose(input);
-
 
 
 
@@ -185,55 +155,35 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error: cannot open file %s\n", outfile);
         return -1;
     }
+    fprintf(stderr, "File %s opened.\n", outfile);
 
     //header completion
-    header.size = code.size();
-    header.filename_length = strlen(argv[1]);
-    for(uint32 i = 0; i < 256; i++)
-        header.key_length[i] = table[i].size();
-    
+    const char *filename = strrchr(argv[1], '\\');
+    if(filename == nullptr) filename = strrchr(argv[1], '/');
+    if(filename != nullptr)
+        filename++; // Move past the '\\' character
+    else
+        filename = argv[1]; // If '\\' is not found, use the entire string as the filename
+
+    #define filename "my_yuuka.jpg"
+    Header header(strlen(filename), inputsize, data.size());
+    fprintf(stderr, "Filename: %s\n", filename);
+    fprintf(stderr, "Compressed size: %08x items.\n", data.size());
+
 
     //writing header, filename
+    fprintf(stderr, "Writing header and filename...\n");
     fwrite(&header, sizeof(header), 1, output);
-    fwrite(argv[1], 1, strlen(argv[1]), output);
-
-    //writing dictionary
-    static uint8 byte = 0;
-    static uint8 bit_count = 0;
-    for(uint32 i = 0; i < 256; i++)
-    {
-        for(bool bit : table[i])
-        {
-            byte |= bit << bit_count;
-            bit_count++;
-            if(bit_count == 8)
-            {
-                fwrite(&byte, 1, 1, output);
-                byte = 0;
-                bit_count = 0;
-            }
-        }
-    }
-    if(bit_count != 0)
-        fwrite(&byte, 1, 1, output);
-    
-
+    fwrite(filename, 1, strlen(filename), output);
     //writing compressed data
-    byte = 0;
-    bit_count = 0;
-    for(bool bit : code)
+    fprintf(stderr, "Writing compressed data...");
+
+    for(auto i: data)
     {
-        byte |= bit << bit_count;
-        bit_count++;
-        if(bit_count == 8)
-        {
-            fwrite(&byte, 1, 1, output);
-            byte = 0;
-            bit_count = 0;
-        }
+        fwrite(&i.index, sizeof(i.index), 1, output);
+        fwrite(&i.next_char, sizeof(i.next_char), 1, output);
     }
-    if(bit_count != 0)
-        fwrite(&byte, 1, 1, output);
+    fprintf(stderr, "Done.\n");
     
     //closing files
     fclose(output);

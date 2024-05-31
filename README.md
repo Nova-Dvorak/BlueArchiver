@@ -47,14 +47,18 @@ Extreme situations which generate Huffman code with 256-bit length aren't tested
 
 # What's more
 
+## About the title
+
+I just want to play a joke on the game which I am crazy about. Since both its simplified-Chinese community and its development team are under a tough situation, I feel a bit depressed... I think I shouldn't have make this thing such an indespensible part of my life, but those lively characters are just so appealing, while the story with historical, mythical elements was so engaging.
+
+By the way, Hayase Yuuka is such an excellent candidate for my mother. Although like the ".yuuka" files, she might be a little heavier than she looks like...
+
+## About the code
+
 Actually the code is mostly written by copilot(in this version), even including some of my comments.
 
 It just popped out loads of codes when I typed my first words, and the codes are just all right when I looked through them.
 
 It was an amazing experience. But sometimes I think it should go quiet. The grey words were like naughty kids shouting at me, telling me how to code.
 
-I'm worrying about being replaced by AIs.
-
-Also being worried about the copyright issue.
-
-If possible, I want to keep the copyright for now.
+Actually, it also helped me to find out that most of my words or codes have just little meaning. I might have to learn much more to become a smart person.
