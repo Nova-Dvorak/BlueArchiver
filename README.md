@@ -1,3 +1,7 @@
+![Weeb sucks...](https://github.com/user-attachments/assets/178ddca1-3d3b-44e5-9517-5a962b45b8a1)
+
+[中文版](README_CN.md)
+
 # Introduction
 
 **BLUE ARCHIVER** is a file archive program using simple compression algorithms, developed as a trial and exercise to enhance my coding skills.
